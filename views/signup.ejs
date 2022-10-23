@@ -1,0 +1,14 @@
+<%- include("partials/header"); %>
+
+<form class="form-signin" method="post" action="/signup">
+    <h1 class="h3 mb-3 font-weight-normal">Sign up to Blogpost</h1>
+    <input type="text" name="firstName" id="firstName" class="form-control" placeholder="First Name" required autofocus>
+    <input type="text" name="lastName" id="lastName" class="form-control" placeholder="Last Name" required>
+    <input type="email" name="username" id="inputEmail" class="form-control" placeholder="Email address" required>
+    <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign Up</button>
+</form>
+<a class="social-link btn btn-lg btn-block btn-primary btn-google" href="auth/google"><i class="fa fa-google" aria-hidden="true"></i>  Continue with Goggle</a>
+<a class="social-link btn btn-lg btn-block btn-primary btn-facebook" href="auth/facebook"><i class="fa fa-facebook" aria-hidden="true"></i>  Continue with Facebook</a>
+
+<%- include("partials/footer"); %>
