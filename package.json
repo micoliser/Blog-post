@@ -10,7 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
-<<<<<<< HEAD
     "dotenv": "^16.0.3",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
@@ -23,11 +22,5 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^7.1.2"
-=======
-    "ejs": "^2.6.1",
-    "express": "^4.16.3",
-    "lodash": "^4.17.11",
-    "mongoose": "^6.6.1"
->>>>>>> 19af54238b25583aa80d478d5157ab5da9038c44
   }
 }
