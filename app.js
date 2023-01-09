@@ -64,8 +64,10 @@ userSchema.plugin(findOrCreate);
 const Blog = mongoose.model("blog", blogSchema);
 const User = mongoose.model("User", userSchema);
 
+// For local authentication
 passport.use(User.createStrategy());
 
+// Use the google strategy to implement login with google
 passport.use(
   new GoogleStrategy(
     {
@@ -90,6 +92,7 @@ passport.use(
   )
 );
 
+// Use the facebook strategy to implement login with facebook
 passport.use(
   new FacebookStrategy(
     {
@@ -127,6 +130,7 @@ passport.deserializeUser(function (user, cb) {
 });
 
 app.get("/", (req, res) => {
+  // Finds all blog and renders the home page with all posted stories
   Blog.find({}, (err, foundPosts) => {
     if (!err) {
       res.render("home", {
@@ -180,21 +184,28 @@ app.get(
 );
 
 app.get("/compose", (req, res) => {
+  // If the request is authenticated
+  // The isAuthenticated() method is provided by passport to check if a request is authenticated
+  // i.e if an authenticated user made the request
   if (req.isAuthenticated()) {
     setTimeout(() => (errorMessage = ""), 200);
     res.render("compose", {
       errorMessage: errorMessage,
     });
   } else {
+    // If req is not authenticated redirect to login so user would login and authenticate
     res.redirect("/login");
   }
 });
 
 app.get("/posts/:postId", (req, res) => {
   const requestedTitle = _.lowerCase(req.params.postId);
+
+  // Finds all posts
   Blog.find({}, (err, foundPosts) => {
     if (!err) {
       foundPosts.forEach((post) => {
+        // Check if the requested id is the post id and renders the post page if true
         if (requestedTitle === _.lowerCase(post._id)) {
           res.render("post", {
             poster: post.posterName,
@@ -209,6 +220,7 @@ app.get("/posts/:postId", (req, res) => {
 });
 
 app.post("/signup", (req, res) => {
+  // The User.register() method is provided by passport-local-mongoose on the user object
   User.register(
     {
       firstName: req.body.firstName,
@@ -218,9 +230,11 @@ app.post("/signup", (req, res) => {
     req.body.password,
     (err) => {
       if (err) {
+        // If error on registration, log the eroor and redirect back to signup
         console.log(err);
         res.redirect("/signup");
       } else {
+        // If successfully registered, authenticate with passport
         passport.authenticate("local")(req, res, () => {
           res.redirect("/compose");
         });
@@ -235,13 +249,14 @@ app.post("/login", (req, res) => {
     password: req.body.password,
   });
 
+  // Authenticate user using passport
   passport.authenticate("local")(req, res, () => {
     res.redirect("/compose");
   });
 });
 
 app.post("/compose", (req, res) => {
-  const { id: userId } = req.user;
+  const { id: userId } = req.user; // Provided by passport after authentication
   const blogTitle = req.body.postTitle;
   const blogBody = req.body.postBody;
   const dateOfPost = new Date();
@@ -256,10 +271,13 @@ app.post("/compose", (req, res) => {
     minutes = "0" + minutes;
   }
 
-  const timeOfPost = dateOfPost.toDateString() + " " + hours + ":" + minutes;
+  const timeOfPost = `${dateOfPost.toDateString()} ${hours}:${minutes}`;
 
+  // Finds user using the userId
   User.findById(userId, (err, user) => {
     if (!err) {
+      // Check if user already has stories posted
+      // If user has stories, checks if any of the story title matches the new story title and throws an error is true
       if (user.blogStories.length != 0) {
         user.blogStories.forEach(({ title }) => {
           if (title.toLowerCase() === blogTitle.toLowerCase()) {
@@ -268,11 +286,11 @@ app.post("/compose", (req, res) => {
         });
       }
 
+      // If no error is thrown
       if (errorMessage.length === 0) {
         // Creates post and push to users posts is there wasnt an error
-
         const newBlog = new Blog({
-          posterName: user.firstName + " " + user.lastName,
+          posterName: `${user.firstName} ${user.lastName}`,
           time: timeOfPost,
           title: blogTitle,
           content: blogBody,
@@ -280,7 +298,6 @@ app.post("/compose", (req, res) => {
         user.blogStories.push(newBlog);
 
         // Save user and if no error, save post and the redirects home
-
         user.save((err) => {
           if (!err) {
             newBlog.save((err) => {
@@ -291,6 +308,7 @@ app.post("/compose", (req, res) => {
           }
         });
       } else {
+        // If error, redirect to compose
         res.redirect("/compose");
       }
     }

@@ -62,9 +62,10 @@ body {
   margin-bottom: 15px;
 }
 
-.social-link {
+.social-link, .link {
   width: 300px;
   margin: auto auto 15px;
+  text-align: center;
 }
 
 .compose-form-div {
