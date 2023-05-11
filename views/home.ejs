@@ -4,7 +4,7 @@
 <p><%= firstParagraph %></p>
 
 <% posts.forEach((post) => { %>
-<h1><%= post.title %></h1>
+<h3><%= post.title %></h3>
 <p class = "post-time">by <%= post.posterName %> at <%= post.time %></p>
 <p><%= post.content.slice(0, 100) + " ..." %><a href="/posts/<%= post._id %>" >Read More</a></p>
 <% }); %>

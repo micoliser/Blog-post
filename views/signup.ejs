@@ -1,6 +1,9 @@
 <%- include("partials/header"); %>
 
 <form class="form-signin" method="post" action="/signup">
+    <p class="error-message">
+        <%= signUpMessage %>
+    </p>
     <h1 class="h3 mb-3 font-weight-normal">Sign up to Blogpost</h1>
     <input type="text" name="firstName" id="firstName" class="form-control" placeholder="First Name" required autofocus>
     <input type="text" name="lastName" id="lastName" class="form-control" placeholder="Last Name" required>

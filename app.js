@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
 const _ = require("lodash");
+const validator = require("validator");
 const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
@@ -52,6 +53,7 @@ mongoose.connect("mongodb://localhost:27017/blogDB");
 
 let errorMessage = "";
 let loginMessage = "";
+let signUpmessage = "";
 
 const blogSchema = new mongoose.Schema({
   posterName: String,
@@ -166,12 +168,21 @@ app.get("/contact", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
+  if (req.query.message) loginMessage = req.query.message;
   setTimeout(() => (loginMessage = ""), 200);
   res.render("login", { loginMessage: loginMessage });
 });
 
 app.get("/signup", (req, res) => {
-  res.render("signup");
+  setTimeout(() => (signUpmessage = ""), 200);
+  res.render("signup", { signUpMessage: signUpmessage });
+});
+
+app.get("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) console.err;
+    else res.redirect("/");
+  });
 });
 
 app.get(
@@ -234,45 +245,91 @@ app.get("/posts/:postId", (req, res) => {
 });
 
 app.post("/signup", (req, res) => {
-  // The User.register() method is provided by passport-local-mongoose on the user object
-  User.register(
-    {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      username: req.body.username,
-    },
-    req.body.password,
-    (err) => {
-      if (err) {
-        // If error on registration, log the eroor and redirect back to signup
-        console.log(err);
-        res.redirect("/signup");
-      } else {
-        // If successfully registered, authenticate with passport
-        passport.authenticate("local")(req, res, () => {
-          res.redirect("/compose");
+  let firstName = req.body.firstName;
+  let lastName = req.body.lastName;
+  let password = req.body.password;
+  let username = req.body.username;
+
+  signUpmessage = "";
+
+  if (!validator.isAlpha(firstName)) {
+    signUpmessage = "First name must contain only alphabets";
+  } else if (!validator.isAlpha(lastName)) {
+    signUpmessage = "Last name must contain only alphabets";
+  } else if (!validator.isEmail(username)) {
+    signUpmessage = "Invalid email address";
+  } else if (
+    !validator.isStrongPassword(password, {
+      minLength: 6,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+    })
+  ) {
+    signUpmessage =
+      "Password must be at least 6 characters long and must contain at least a lowercase alphabet, a lowercase alphabet and a number";
+  } else {
+    User.find({}, (err, users) => {
+      if (!err) {
+        users.forEach((user) => {
+          if (user.username.toLowerCase() === username.toLowerCase()) {
+            signUpmessage =
+              "There is a user with the same email, try again or login instead";
+          }
         });
       }
-    }
-  );
+    });
+  }
+
+  if (signUpmessage !== "") {
+    res.redirect("/signup");
+  } else {
+    // The User.register() method is provided by passport-local-mongoose on the user object
+    User.register(
+      {
+        firstName: firstName,
+        lastName: lastName,
+        username: username,
+      },
+      password,
+      (err) => {
+        if (err) {
+          // If error on registration, log the eroor and redirect back to signup
+          console.log(err);
+          res.redirect("/signup");
+        } else {
+          // If successfully registered, authenticate with passport
+          passport.authenticate("local")(req, res, () => {
+            res.redirect("/");
+          });
+        }
+      }
+    );
+  }
 });
 
 app.post("/login", (req, res) => {
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password,
-  });
+  let username = req.body.username;
 
-  // Authenticate user using passport
-  passport.authenticate("local")(req, res, () => {
-    res.redirect("/compose");
-  });
-});
-
-app.get("/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) console.err;
-    else res.redirect("/");
+  User.findOne({ username: username }, (err, user) => {
+    if (!err) {
+      if (!user) {
+        loginMessage = `No user exits with username ${username}. Create account`;
+        res.redirect("/login");
+      } else {
+        // Authenticate user using passport
+        passport.authenticate("local", {
+          failureRedirect:
+            "/login?message=" +
+            encodeURIComponent("Invalid username or password"),
+        })(req, res, () => {
+          res.redirect("/");
+        });
+      }
+    } else {
+      console.log(error);
+      res.redirect("/login");
+    }
   });
 });
 

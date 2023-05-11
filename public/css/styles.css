@@ -90,7 +90,22 @@ body {
 }
 
 .footer p {
-	margin-top: 25px;
+  margin-top: 10px;
+  margin-bottom: 3px;
 	font-size: 12px;
   color: #fff;
+}
+
+.footer a {
+  display: inline-block;
+  margin-left: 10x;
+  margin-right: 10px;
+  border-radius: 3px;
+  text-decoration: none;
+  font-size: 16px;
+  color: white;
+}
+
+.footer a:hover {
+  transform: scale(1.2);
 }
