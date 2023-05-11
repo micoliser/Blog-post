@@ -1,6 +1,7 @@
 <%- include("partials/header"); %>
 
 <form class="form-signin" action="/login" method="post">
+    <p class="error-message"><%= loginMessage %></p>
     <h1 class="h3 mb-3 font-weight-normal">Login to Blogpost</h1>
     <input type="email" name="username" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
     <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>

@@ -37,9 +37,21 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use((req, res, next) => {
+  // Check if the user is authenticated
+  let authenticated = false;
+  if (req.isAuthenticated()) {
+    authenticated = true;
+  }
+  // Add the authenticated variable to the res.locals object
+  res.locals.authenticated = authenticated;
+  next();
+});
+
 mongoose.connect("mongodb://localhost:27017/blogDB");
 
 let errorMessage = "";
+let loginMessage = "";
 
 const blogSchema = new mongoose.Schema({
   posterName: String,
@@ -154,7 +166,8 @@ app.get("/contact", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  setTimeout(() => (loginMessage = ""), 200);
+  res.render("login", { loginMessage: loginMessage });
 });
 
 app.get("/signup", (req, res) => {
@@ -194,6 +207,7 @@ app.get("/compose", (req, res) => {
     });
   } else {
     // If req is not authenticated redirect to login so user would login and authenticate
+    loginMessage = "You must login first";
     res.redirect("/login");
   }
 });
@@ -252,6 +266,13 @@ app.post("/login", (req, res) => {
   // Authenticate user using passport
   passport.authenticate("local")(req, res, () => {
     res.redirect("/compose");
+  });
+});
+
+app.get("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) console.err;
+    else res.redirect("/");
   });
 });
 
