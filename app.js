@@ -88,7 +88,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/auth/google/blogpost',
+      callbackURL: 'https://blog.samueliwelumo.tech/auth/google/blogpost',
     },
     function (accessToken, refreshToken, profile, cb) {
       const { id, name } = profile;
@@ -113,7 +113,7 @@ passport.use(
     {
       clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: 'http://localhost:3000/auth/facebook/blogpost',
+      callbackURL: 'https://blog.samueliwelumo.tech/auth/facebook/blogpost',
     },
     function (accessToken, refreshToken, profile, cb) {
       const { id, displayName } = profile;
