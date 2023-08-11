@@ -3,10 +3,20 @@
 <h1>Home</h1>
 <p><%= firstParagraph %></p>
 
+<section class="posts">
 <% posts.forEach((post) => { %>
-<h3><%= post.title %></h3>
-<p class = "post-time">by <%= post.posterName %> at <%= post.time %></p>
-<p><%= post.content.slice(0, 100) + " ..." %><a href="/posts/<%= post._id %>" >Read More</a></p>
+<div class="post">
+    <h3><%= post.title %></h3>
+    <p class = "post-time">by <%= post.posterName %> at <%= post.time %></p>
+    <p><%= post.content.slice(0, 100) + " ..." %><a href="/posts/<%= post._id %>" >Read More</a></p>
+    <% if (post.posterId === id) { %>
+    <form action="/delete-post" method="post">
+        <input type="hidden" name="postId" value="<%= post._id %>">
+        <button class="delete" type="submit" name="button">Delete</button>
+    </form>
+    <% } %>
+</div>
 <% }); %>
+</section>
 
 <%- include("partials/footer"); -%>

@@ -1,33 +1,82 @@
 html,
 body {
   height: 100%;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.navbar {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  border: 0;
+  border-radius: 0;
+  margin-bottom: 30px;
+  font-size: 12px;
+  letter-spacing: 3px;
+}
+
+.navbar-brand a {
+  font-size: 2rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+#signup,
+#logout {
+  border: 1px solid #1abc9c;
+}
+
+.navbar-nav li a:hover {
+  color: #1abc9c !important;
 }
 
 .error-message {
   color: red;
 }
 
+.delete {
+  display: inline-block;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 7px;
+}
+
+.posts {
+  margin-top: 30px;
+}
+
+.post {
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.post h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
 .post-time {
-  font-size: 1.2rem;
-  font-style: oblique;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 5px;
 }
 
-.navbar {
-    padding-top: 15px;
-    padding-bottom: 15px;
-    border: 0;
-    border-radius: 0;
-    margin-bottom: 0;
-    font-size: 12px;
-    letter-spacing: 3px;
+.post p {
+  color: #444;
 }
 
-#signup, #logout {
-  border: 1px solid #1abc9c;
+.post a {
+  color: #007bff;
+  text-decoration: none;
 }
 
-.navbar-nav  li a:hover {
-    color: #1abc9c !important;
+.post a:hover {
+  text-decoration: underline;
 }
 
 .form-signin {
