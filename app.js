@@ -383,7 +383,9 @@ app.post("/compose", (req, res) => {
         // Creates post and push to users posts is there wasnt an error
         const newBlog = new Blog({
           posterId: userId,
-          posterName: `${user.firstName} ${user.lastName}`,
+          posterName: `${user.firstName ? user.firstName : ""} ${
+            user.lastName ? user.lastName : ""
+          }`,
           time: timeOfPost,
           title: blogTitle,
           content: blogBody,
