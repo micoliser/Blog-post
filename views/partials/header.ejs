@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blog Post</title>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blog Post</title>
+    <!-- Font Awesome -->
+    <script
+      src="https://kit.fontawesome.com/7664e6297c.js"
+      crossorigin="anonymous"
+    ></script>
 
-  <!-- Font Awesome -->
-  <script src="https://kit.fontawesome.com/7664e6297c.js" crossorigin="anonymous"></script>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="/css/social.css" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
 
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/css/social.css">
-  <link rel="stylesheet" href="/css/styles.css">
-</head>
-
-<body>
+  <body>
     <nav class="navbar navbar-default">
       <div class="container">
         <div class="navbar-header">
@@ -27,12 +32,14 @@
           <li id="about"><a href="/about">ABOUT US</a></li>
           <li id="contact"><a href="/contact">CONTACT US</a></li>
           <% if (authenticated) { %>
-            <li id="logout"><a href="/logout">LOGOUT</a></li>
-            <% } else { %>
-              <li id="login"><a href="/login">LOGIN</a></li>
-              <li id="signup"><a href="/signup">SIGN UP</a></li>
-              <% } %>
+          <li id="logout"><a href="/logout">LOGOUT</a></li>
+          <% } else { %>
+          <li id="login"><a href="/login">LOGIN</a></li>
+          <li id="signup"><a href="/signup">SIGN UP</a></li>
+          <% } %>
         </ul>
       </div>
     </nav>
-    <div class="container">
+    <div class="container"></div>
+  </body>
+</html>

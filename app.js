@@ -1,30 +1,23 @@
 //jshint esversion:6
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const ejs = require('ejs');
-const mongoose = require('mongoose');
-const _ = require('lodash');
-const validator = require('validator');
-const session = require('express-session');
-const passport = require('passport');
-const passportLocalMongoose = require('passport-local-mongoose');
-const findOrCreate = require('mongoose-findorcreate');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
+require("dotenv").config();
+const express = require("express");
+const bodyParser = require("body-parser");
+const ejs = require("ejs");
+const mongoose = require("mongoose");
+const _ = require("lodash");
+const validator = require("validator");
+const session = require("express-session");
+const passport = require("passport");
+const passportLocalMongoose = require("passport-local-mongoose");
+const findOrCreate = require("mongoose-findorcreate");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 
 const app = express();
 
-const homeStartingContent =
-  'Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.';
-const aboutContent =
-  'Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Non diam phasellus vestibulum lorem sed. Platea dictumst quisque sagittis purus sit. Egestas sed sed risus pretium quam vulputate dignissim suspendisse. Mauris in aliquam sem fringilla. Semper risus in hendrerit gravida rutrum quisque non tellus orci. Amet massa vitae tortor condimentum lacinia quis vel eros. Enim ut tellus elementum sagittis vitae. Mauris ultrices eros in cursus turpis massa tincidunt dui.';
-const contactContent =
-  'Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices. Arcu dui vivamus arcu felis bibendum. Consectetur adipiscing elit duis tristique. Risus viverra adipiscing at in tellus integer feugiat. Sapien nec sagittis aliquam malesuada bibendum arcu vitae. Consequat interdum varius sit amet mattis. Iaculis nunc sed augue lacus. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit. Pulvinar elementum integer enim neque. Ultrices gravida dictum fusce ut placerat orci nulla. Mauris in aliquam sem fringilla ut morbi tincidunt. Tortor posuere ac ut consequat semper viverra nam libero.';
+app.set("view engine", "ejs");
 
-app.set('view engine', 'ejs');
-
-app.use(express.static('public'));
+app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(
@@ -49,11 +42,11 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose.connect('mongodb://127.0.0.1:27017/blogDB');
+mongoose.connect("mongodb://127.0.0.1:27017/blogDB");
 
-let errorMessage = '';
-let loginMessage = '';
-let signUpmessage = '';
+let errorMessage = "";
+let loginMessage = "";
+let signUpmessage = "";
 
 const blogSchema = new mongoose.Schema({
   posterId: String,
@@ -76,8 +69,8 @@ const userSchema = new mongoose.Schema({
 userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
 
-const Blog = mongoose.model('blog', blogSchema);
-const User = mongoose.model('User', userSchema);
+const Blog = mongoose.model("blog", blogSchema);
+const User = mongoose.model("User", userSchema);
 
 // For local authentication
 passport.use(User.createStrategy());
@@ -88,7 +81,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'https://blog.samueliwelumo.tech/auth/google/blogpost',
+      callbackURL: `${process.env.BASE_URL}/auth/google/blogpost`,
     },
     function (accessToken, refreshToken, profile, cb) {
       const { id, name } = profile;
@@ -113,11 +106,11 @@ passport.use(
     {
       clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: 'https://blog.samueliwelumo.tech/auth/facebook/blogpost',
+      callbackURL: `${process.env.BASE_URL}/auth/facebook/blogpost`,
     },
     function (accessToken, refreshToken, profile, cb) {
       const { id, displayName } = profile;
-      const [fName, lName] = displayName.split(' ');
+      const [fName, lName] = displayName.split(" ");
       User.findOrCreate(
         { firstName: fName, lastName: lName, username: lName, facebookId: id },
         function (err, user) {
@@ -144,88 +137,90 @@ passport.deserializeUser(function (user, cb) {
   });
 });
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   // Finds all blog and renders the home page with all posted stories
   Blog.find({}, (err, foundPosts) => {
     if (!err) {
-      res.render('home', {
-        firstParagraph: homeStartingContent,
-        id: req.user ? req.user.id : '',
-        posts: foundPosts,
+      // Sort posts by most recent first using the time field
+      const sortedPosts = foundPosts.sort((a, b) => {
+        // Convert time string to Date for comparison
+        const dateA = new Date(a.time);
+        const dateB = new Date(b.time);
+        return dateB - dateA;
+      });
+      res.render("home", {
+        id: req.user ? req.user.id : "",
+        posts: sortedPosts,
       });
     }
   });
 });
 
-app.get('/about', (req, res) => {
-  res.render('about', {
-    firstParagraph: aboutContent,
-  });
+app.get("/about", (req, res) => {
+  res.render("about");
 });
 
-app.get('/contact', (req, res) => {
-  res.render('contact', {
-    firstParagraph: contactContent,
-  });
+app.get("/contact", (req, res) => {
+  res.render("contact");
 });
 
-app.get('/login', (req, res) => {
+app.get("/login", (req, res) => {
   if (req.query.message) loginMessage = req.query.message;
-  setTimeout(() => (loginMessage = ''), 200);
-  res.render('login', { loginMessage: loginMessage });
+  setTimeout(() => (loginMessage = ""), 200);
+  res.render("login", { loginMessage: loginMessage });
 });
 
-app.get('/signup', (req, res) => {
-  setTimeout(() => (signUpmessage = ''), 200);
-  res.render('signup', { signUpMessage: signUpmessage });
+app.get("/signup", (req, res) => {
+  setTimeout(() => (signUpmessage = ""), 200);
+  res.render("signup", { signUpMessage: signUpmessage });
 });
 
-app.get('/logout', (req, res) => {
+app.get("/logout", (req, res) => {
   req.logout((err) => {
     if (err) console.err;
-    else res.redirect('/');
+    else res.redirect("/");
   });
 });
 
 app.get(
-  '/auth/google',
-  passport.authenticate('google', { scope: ['profile'] })
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile"] })
 );
 
 app.get(
-  '/auth/google/blogpost',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  "/auth/google/blogpost",
+  passport.authenticate("google", { failureRedirect: "/login" }),
   function (req, res) {
-    res.redirect('/compose');
+    res.redirect("/compose");
   }
 );
-app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get("/auth/facebook", passport.authenticate("facebook"));
 
 app.get(
-  '/auth/facebook/blogpost',
-  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  "/auth/facebook/blogpost",
+  passport.authenticate("facebook", { failureRedirect: "/login" }),
   function (req, res) {
-    res.redirect('/compose');
+    res.redirect("/compose");
   }
 );
 
-app.get('/compose', (req, res) => {
+app.get("/compose", (req, res) => {
   // If the request is authenticated
   // The isAuthenticated() method is provided by passport to check if a request is authenticated
   // i.e if an authenticated user made the request
   if (req.isAuthenticated()) {
-    setTimeout(() => (errorMessage = ''), 200);
-    res.render('compose', {
+    setTimeout(() => (errorMessage = ""), 200);
+    res.render("compose", {
       errorMessage: errorMessage,
     });
   } else {
     // If req is not authenticated redirect to login so user would login and authenticate
-    loginMessage = 'You must login first';
-    res.redirect('/login');
+    loginMessage = "You must login first";
+    res.redirect("/login");
   }
 });
 
-app.get('/posts/:postId', (req, res) => {
+app.get("/posts/:postId", (req, res) => {
   const requestedTitle = _.lowerCase(req.params.postId);
 
   // Finds all posts
@@ -234,8 +229,8 @@ app.get('/posts/:postId', (req, res) => {
       foundPosts.forEach((post) => {
         // Check if the requested id is the post id and renders the post page if true
         if (requestedTitle === _.lowerCase(post._id)) {
-          res.render('post', {
-            id: req.user ? req.user.id : '',
+          res.render("post", {
+            id: req.user ? req.user.id : "",
             post: post,
           });
         }
@@ -244,7 +239,7 @@ app.get('/posts/:postId', (req, res) => {
   });
 });
 
-app.post('/delete-post', (req, res) => {
+app.post("/delete-post", (req, res) => {
   // If the request is authenticated
   if (req.isAuthenticated()) {
     // Get the post id
@@ -253,30 +248,30 @@ app.post('/delete-post', (req, res) => {
     // Delete the post with the id
     Blog.findByIdAndDelete(postId, (err) => {
       if (!err) {
-        res.redirect('/');
+        res.redirect("/");
       }
     });
   } else {
     // If req is not authenticated redirect to login so user would login and authenticate
-    loginMessage = 'You must login first';
-    res.redirect('/login');
+    loginMessage = "You must login first";
+    res.redirect("/login");
   }
 });
 
-app.post('/signup', (req, res) => {
+app.post("/signup", (req, res) => {
   let firstName = req.body.firstName;
   let lastName = req.body.lastName;
   let password = req.body.password;
   let username = req.body.username;
 
-  signUpmessage = '';
+  signUpmessage = "";
 
   if (!validator.isAlpha(firstName)) {
-    signUpmessage = 'First name must contain only alphabets';
+    signUpmessage = "First name must contain only alphabets";
   } else if (!validator.isAlpha(lastName)) {
-    signUpmessage = 'Last name must contain only alphabets';
+    signUpmessage = "Last name must contain only alphabets";
   } else if (!validator.isEmail(username)) {
-    signUpmessage = 'Invalid email address';
+    signUpmessage = "Invalid email address";
   } else if (
     !validator.isStrongPassword(password, {
       minLength: 6,
@@ -286,22 +281,22 @@ app.post('/signup', (req, res) => {
     })
   ) {
     signUpmessage =
-      'Password must be at least 6 characters long and must contain at least a lowercase alphabet, a lowercase alphabet and a number';
+      "Password must be at least 6 characters long and must contain at least a lowercase alphabet, a lowercase alphabet and a number";
   } else {
     User.find({}, (err, users) => {
       if (!err) {
         users.forEach((user) => {
           if (user.username.toLowerCase() === username.toLowerCase()) {
             signUpmessage =
-              'There is a user with the same email, try again or login instead';
+              "There is a user with the same email, try again or login instead";
           }
         });
       }
     });
   }
 
-  if (signUpmessage !== '') {
-    res.redirect('/signup');
+  if (signUpmessage !== "") {
+    res.redirect("/signup");
   } else {
     // The User.register() method is provided by passport-local-mongoose on the user object
     User.register(
@@ -315,11 +310,11 @@ app.post('/signup', (req, res) => {
         if (err) {
           // If error on registration, log the eroor and redirect back to signup
           console.log(err);
-          res.redirect('/signup');
+          res.redirect("/signup");
         } else {
           // If successfully registered, authenticate with passport
-          passport.authenticate('local')(req, res, () => {
-            res.redirect('/');
+          passport.authenticate("local")(req, res, () => {
+            res.redirect("/");
           });
         }
       }
@@ -327,32 +322,32 @@ app.post('/signup', (req, res) => {
   }
 });
 
-app.post('/login', (req, res) => {
+app.post("/login", (req, res) => {
   let username = req.body.username;
 
   User.findOne({ username: username }, (err, user) => {
     if (!err) {
       if (!user) {
         loginMessage = `No user exits with username ${username}. Create account`;
-        res.redirect('/login');
+        res.redirect("/login");
       } else {
         // Authenticate user using passport
-        passport.authenticate('local', {
+        passport.authenticate("local", {
           failureRedirect:
-            '/login?message=' +
-            encodeURIComponent('Invalid username or password'),
+            "/login?message=" +
+            encodeURIComponent("Invalid username or password"),
         })(req, res, () => {
-          res.redirect('/');
+          res.redirect("/");
         });
       }
     } else {
       console.log(error);
-      res.redirect('/login');
+      res.redirect("/login");
     }
   });
 });
 
-app.post('/compose', (req, res) => {
+app.post("/compose", (req, res) => {
   const { id: userId } = req.user; // Provided by passport after authentication
   const blogTitle = req.body.postTitle;
   const blogBody = req.body.postBody;
@@ -361,11 +356,11 @@ app.post('/compose', (req, res) => {
   let minutes = dateOfPost.getMinutes().toString();
 
   if (hours.length === 1) {
-    hours = '0' + hours;
+    hours = "0" + hours;
   }
 
   if (minutes.length === 1) {
-    minutes = '0' + minutes;
+    minutes = "0" + minutes;
   }
 
   const timeOfPost = `${dateOfPost.toDateString()} ${hours}:${minutes}`;
@@ -378,7 +373,7 @@ app.post('/compose', (req, res) => {
       if (user.blogStories.length != 0) {
         user.blogStories.forEach(({ title }) => {
           if (title.toLowerCase() === blogTitle.toLowerCase()) {
-            errorMessage = 'Error: you already have a post with that title';
+            errorMessage = "Error: you already have a post with that title";
           }
         });
       }
@@ -400,19 +395,19 @@ app.post('/compose', (req, res) => {
           if (!err) {
             newBlog.save((err) => {
               if (!err) {
-                res.redirect('/');
+                res.redirect("/");
               }
             });
           }
         });
       } else {
         // If error, redirect to compose
-        res.redirect('/compose');
+        res.redirect("/compose");
       }
     }
   });
 });
 
 app.listen(3005, function () {
-  console.log('Server started on port 3005');
+  console.log("Server started on port 3005");
 });
